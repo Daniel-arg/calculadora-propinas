@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Propinas</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e0e0e0;
+      padding: 1rem;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.75rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span { color: #e94560; }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a0a0b0;
+      margin-bottom: 0.4rem;
+    }
+
+    .field { margin-bottom: 1.25rem; }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="number"]:focus {
+      border-color: #e94560;
+    }
+
+    input[type="number"]::placeholder { color: #606070; }
+
+    /* Tip buttons */
+    .tip-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tip-btn {
+      padding: 0.6rem 0;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      color: #c0c0d0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .tip-btn:hover { background: rgba(233,69,96,0.2); border-color: #e94560; color: #fff; }
+    .tip-btn.active { background: #e94560; border-color: #e94560; color: #fff; box-shadow: 0 4px 12px rgba(233,69,96,0.4); }
+
+    /* Custom tip */
+    .custom-tip-wrap {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .custom-tip-wrap input {
+      padding-right: 2.5rem;
+    }
+
+    .custom-tip-wrap::after {
+      content: '%';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #a0a0b0;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    /* Results */
+    .results {
+      background: rgba(233,69,96,0.08);
+      border: 1px solid rgba(233,69,96,0.25);
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+
+    .result-row + .result-row {
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .result-label { font-size: 0.85rem; color: #a0a0b0; }
+
+    .result-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .result-row.total .result-label { color: #e0e0e0; font-weight: 600; }
+    .result-row.total .result-value { font-size: 1.3rem; color: #e94560; }
+
+    .empty-state {
+      text-align: center;
+      color: #606070;
+      font-size: 0.85rem;
+      padding: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Calculadora de <span>Propinas</span></h1>
+
+    <div class="field">
+      <label>Monto de la cuenta</label>
+      <input type="number" id="bill" placeholder="0.00" min="0" step="0.01" />
+    </div>
+
+    <div class="field">
+      <label>Porcentaje de propina</label>
+      <div class="tip-grid">
+        <button class="tip-btn" data-tip="10">10%</button>
+        <button class="tip-btn" data-tip="15">15%</button>
+        <button class="tip-btn" data-tip="18">18%</button>
+        <button class="tip-btn" data-tip="20">20%</button>
+      </div>
+      <label>Porcentaje personalizado</label>
+      <div class="custom-tip-wrap">
+        <input type="number" id="customTip" placeholder="Ej: 12" min="0" max="100" step="1" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Número de personas</label>
+      <input type="number" id="people" placeholder="1" min="1" step="1" value="1" />
+    </div>
+
+    <div class="results" id="results">
+      <div class="empty-state">Ingresá un monto para ver el resultado</div>
+    </div>
+  </div>
+
+  <script>
+    const billEl     = document.getElementById('bill');
+    const customTip  = document.getElementById('customTip');
+    const peopleEl   = document.getElementById('people');
+    const resultsEl  = document.getElementById('results');
+    const tipBtns    = document.querySelectorAll('.tip-btn');
+
+    let selectedTip = null;
+
+    tipBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tipBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedTip = parseFloat(btn.dataset.tip);
+        customTip.value = '';
+        calculate();
+      });
+    });
+
+    customTip.addEventListener('input', () => {
+      tipBtns.forEach(b => b.classList.remove('active'));
+      selectedTip = null;
+      calculate();
+    });
+
+    billEl.addEventListener('input', calculate);
+    peopleEl.addEventListener('input', calculate);
+
+    function fmt(n) {
+      return n.toLocaleString('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 });
+    }
+
+    function calculate() {
+      const bill   = parseFloat(billEl.value) || 0;
+      const tip    = selectedTip !== null ? selectedTip : (parseFloat(customTip.value) || 0);
+      const people = Math.max(1, parseInt(peopleEl.value) || 1);
+
+      if (bill <= 0) {
+        resultsEl.innerHTML = '<div class="empty-state">Ingresá un monto para ver el resultado</div>';
+        return;
+      }
+
+      const tipAmount  = bill * (tip / 100);
+      const total      = bill + tipAmount;
+      const perPerson  = total / people;
+      const tipPerson  = tipAmount / people;
+
+      resultsEl.innerHTML = `
+        <div class="result-row">
+          <span class="result-label">Propina (${tip}%)</span>
+          <span class="result-value">${fmt(tipAmount)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Propina por persona</span>
+          <span class="result-value">${fmt(tipPerson)}</span>
+        </div>
+        <div class="result-row total">
+          <span class="result-label">Total por persona</span>
+          <span class="result-value">${fmt(perPerson)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Total general</span>
+          <span class="result-value">${fmt(total)}</span>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
